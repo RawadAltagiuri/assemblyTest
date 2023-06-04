@@ -1,0 +1,313 @@
+ORG 0
+
+BCD, HEX 0			//the Answer will be stored here by the end
+HexFirst, HEX 0 	//store the first digit of the hex number
+HexSecond, HEX 0 	//store the second digit of the hex number
+HexFull, HEX 0		//store the whole hex number
+SIXTEEN, DEC 16
+SIX, HEX 6
+SIXTY, HEX 60
+Four, DEC 4
+Twelve2, DEC 12
+Twelve, DEC 12
+TempTwelve, DEC 12
+TEN, HEX A
+NEG, DEC -1
+TEMP, HEX 0
+Zero, HEX 0
+Left, HEX 0
+Right, Hex 0
+
+//Program starts here
+INP
+STA HexFull
+LDA HexFull
+STA TEMP
+
+StoringLoopSecond, //Store the second digit in the variable HexSecond
+	LDA Four
+	ADD NEG
+	STA Four
+	LDA TEMP
+	CLE
+	CIR
+	CLE
+	STA TEMP
+	LDA Four
+	SZA
+	BUN StoringLoopSecond
+
+LDA TEMP
+STA HexSecond
+LDA HexFull
+STA TEMP
+
+StorintLoopFirst, //Store the first digit in the variable HexFirst.
+	LDA Twelve
+	ADD NEG
+	STA Twelve
+	LDA TEMP
+	CLE
+	CIL			//shift left and clear the carry bit so we get rid of the digitis after the first
+	CLE
+	STA TEMP
+	LDA Twelve
+	SZA
+	BUN StorintLoopFirst
+
+LDA TEMP
+CIL				//shift the last 4 bits back into position
+CIL
+CIL
+CIL
+CIL
+STA HexFirst
+LDA HexFull
+STA TEMP
+
+LDA Zero
+STA TEMP
+BUN CheckSecondHex
+BackFromAddingSecondHex, LDA TEMP
+
+AddingLoop, 						//Multiply the second digit by 16
+			LDA SIXTEEN
+			ADD NEG
+			STA SIXTEEN
+			LDA TEMP
+			ADD HexSecond
+			STA TEMP
+			LDA TEMP
+			BUN CheckLeftDigitAddition //check if the left digit is A or bigger and convert it into its decimal presentation
+BackToCheckRight,	BUN CheckRightDigitAddition //check if the right digit is A or bigger and convert it into its decimal presentation
+Back,			LDA SIXTEEN
+			SZA
+			BUN AddingLoop
+
+
+			LDA TEMP
+			BUN CheckFirstHex //If the first digit is A or bigger convert it into its decimal representation
+BackFromtAdding,	LDA TEMP
+			ADD HexFirst
+			STA TEMP
+			BUN CheckLeftBCD //check if the left digit is A or bigger and convert it into its decimal presentation
+BackToCheckRight2,	BUN CheckRightBCD //check if the right digit is A or bigger and convert it into its decimal presentation
+Back2, 			LDA TEMP
+			STA BCD
+BackBCD, 		HLT
+
+
+
+CheckLeftDigitAddition, //check if the left digit is A or bigger and convert it into its decimal presentation
+	LDA TEMP
+	STA Left
+	CLE //get rid of right digit
+	CIR
+	CLE
+	CIR
+	CLE
+	CIR
+	CLE
+	CIR
+	CLE
+	STA Left
+	LDA Left
+	StorintLoopFirst3, //First position
+		LDA Twelve2
+		ADD NEG
+		STA Twelve2
+		LDA Left
+		CLE
+		CIL
+		CLE
+		STA Left
+		LDA Twelve2
+		SZA
+		BUN StorintLoopFirst3
+	LDA TempTwelve //we store 12 back into the variable 12
+	STA Twelve2
+	LDA Left
+	CIL
+	CIL
+	CIL
+	CIL
+	CIL
+	STA Left
+	LDA Left
+	CMA
+	ADD TEN
+	CMA
+	SNA
+	BUN ADDSIXTY
+	BUN BackToCheckRight
+
+CheckRightDigitAddition, //check if the right digit is A or bigger and convert it into its decimal presentation
+	LDA TEMP
+	STA Right
+	StorintLoopFirst2, //First position
+		LDA Twelve2
+		ADD NEG
+		STA Twelve2
+		LDA Right
+		CLE
+		CIL
+		CLE
+		STA Right
+		LDA Twelve2
+		SZA
+		BUN StorintLoopFirst2
+
+	LDA TempTwelve
+	STA Twelve2
+	LDA Right
+	CIL
+	CIL
+	CIL
+	CIL
+	CIL
+	STA Right
+	LDA Right
+	CMA
+	ADD TEN //minus 10 from it, this way we see if the digit is A or larger.
+	CMA
+	SNA
+	BUN ADDSIX
+	BUN Back
+	
+	
+	
+ADDSIXTY,
+	LDA TEMP
+	ADD SIXTY
+	STA TEMP
+	BUN BackToCheckRight
+ADDSIX,
+	LDA TEMP
+	ADD SIX
+	STA TEMP
+	BUN Back
+
+CheckLeftBCD, //check if the left digit is A or bigger and convert it into its decimal presentation
+	LDA TEMP
+	STA Left
+	CLE //get rid of right digit
+	CIR
+	CLE
+	CIR
+	CLE
+	CIR
+	CLE
+	CIR
+	CLE
+	STA Left
+	LDA Left
+	StorintLoopFirst32, //First position
+		LDA Twelve2
+		ADD NEG
+		STA Twelve2
+		LDA Left
+		CLE
+		CIL
+		CLE
+		STA Left
+		LDA Twelve2
+		SZA
+		BUN StorintLoopFirst32
+
+	LDA TempTwelve
+	STA Twelve2
+	LDA Left
+	CIL
+	CIL
+	CIL
+	CIL
+	CIL
+	STA Left
+	LDA Left
+	CMA
+	ADD TEN //minus 10 from it, this way we see if the digit is A or larger.
+	CMA
+	SNA
+	BUN ADDSIXTYBCD
+	BUN BackToCheckRight2
+
+CheckRightBCD, //check if the right digit is A or bigger and convert it into its decimal presentation
+	LDA TEMP
+	STA Right
+	StorintLoopFirst22, //First position
+		LDA Twelve2
+		ADD NEG
+		STA Twelve2
+		LDA Right
+		CLE
+		CIL
+		CLE
+		STA Right
+		LDA Twelve2
+		SZA
+		BUN StorintLoopFirst22
+	LDA TempTwelve
+	STA Twelve2
+	LDA Right
+	CIL
+	CIL
+	CIL
+	CIL
+	CIL
+	STA Right
+	LDA Right
+	CMA
+	ADD TEN 	//minus 10 from it, this way we see if the digit is A or larger.
+	CMA
+	SNA
+	BUN ADDSIXBCD
+	BUN Back2
+	
+	
+	
+ADDSIXTYBCD,
+	LDA TEMP
+	ADD SIXTY
+	STA TEMP
+	BUN BackToCheckRight2
+ADDSIXBCD,
+	LDA TEMP
+	ADD SIX
+	STA TEMP
+	BUN Back2
+
+
+	
+CheckFirstHex, //check if the first hex is a letter, if it is turn it into a the equivelant decimal number by adding six
+	LDA HexFirst
+	CMA
+	ADD TEN //minus 10 from it, this way we see if the digit is A or larger.
+	CMA
+	SNA
+	BUN ADDSIXTOFIRSTHEX
+	BUN BackFromtAdding
+
+CheckSecondHex, //check if the second digit is a letter, if it is turn it into its decimal equivelant by adding sixty
+	LDA HexSecond
+	CMA
+	ADD TEN //minus 10 from it, this way we see if the digit is A or larger.
+	CMA
+	SNA
+	BUN ADDSIXTOSECONDHEX
+	BUN BackFromAddingSecondHex
+
+
+ADDSIXTOFIRSTHEX,
+	LDA HexFirst
+	ADD SIX
+	STA HexFirst
+	BUN BackFromtAdding
+
+ADDSIXTOSECONDHEX,
+	LDA HexSecond
+	ADD SIX
+	STA HexSecond
+	BUN BackFromAddingSecondHex
+	
+	
+	
